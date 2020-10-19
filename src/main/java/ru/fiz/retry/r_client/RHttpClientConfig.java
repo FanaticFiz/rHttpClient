@@ -1,22 +1,23 @@
 package ru.fiz.retry.r_client;
 
+import java.util.List;
+
 public class RHttpClientConfig {
 
     private final int maxAttempts;
     private final long waitDuration;
-    private int[] successCodes;
-    private int[] retryCodes;
+    private final List<Integer> retryCodes;
 
-    public RHttpClientConfig(int maxAttempts, long waitDuration, int[] successCodes, int[] retryCodes) {
+    public RHttpClientConfig(int maxAttempts, long waitDuration, List<Integer> retryCodes) {
         this.maxAttempts = maxAttempts;
         this.waitDuration = waitDuration;
-        this.successCodes = successCodes;
         this.retryCodes = retryCodes;
     }
 
     public RHttpClientConfig() {
         maxAttempts = 3;
         waitDuration = 3000L;
+        retryCodes = List.of(408, 429, 500, 502, 503, 504);
     }
 
     public static RHttpClientConfigBuilder builder() {
@@ -31,19 +32,21 @@ public class RHttpClientConfig {
         return this.waitDuration;
     }
 
-    public int[] getSuccessCodes() {
-        return this.successCodes;
+    public List<Integer> getRetryCodes() {
+        return this.retryCodes;
     }
 
-    public int[] getRetryCodes() {
-        return this.retryCodes;
+    public String toString() {
+        return "RHttpClientConfig.(" +
+                "maxAttempts=" + this.maxAttempts + ", " +
+                "waitDuration=" + this.waitDuration + ", " +
+                "retryCodes=" + this.retryCodes.toString() + ")";
     }
 
     public static class RHttpClientConfigBuilder {
         private int maxAttempts;
         private long waitDuration;
-        private int[] successCodes;
-        private int[] retryCodes;
+        private List<Integer> retryCodes;
 
         RHttpClientConfigBuilder() {
         }
@@ -66,25 +69,13 @@ public class RHttpClientConfig {
             }
         }
 
-        public RHttpClientConfig.RHttpClientConfigBuilder successCodes(int[] successCodes) {
-            this.successCodes = successCodes;
-            return this;
-        }
-
-        public RHttpClientConfig.RHttpClientConfigBuilder retryCodes(int[] retryCodes) {
+        public RHttpClientConfig.RHttpClientConfigBuilder retryCodes(List<Integer> retryCodes) {
             this.retryCodes = retryCodes;
             return this;
         }
 
         public RHttpClientConfig build() {
-            return new RHttpClientConfig(maxAttempts, waitDuration, successCodes, retryCodes);
-        }
-
-        public String toString() {
-            return "RHttpClientConfig.RHttpClientConfigBuilder(maxAttempts=" + this.maxAttempts + ", " +
-                    "waitDuration=" + this.waitDuration + ", " +
-                    "successCodes=" + java.util.Arrays.toString(this.successCodes) + ", " +
-                    "retryCodes=" + java.util.Arrays.toString(this.retryCodes) + ")";
+            return new RHttpClientConfig(maxAttempts, waitDuration, retryCodes);
         }
     }
 }

@@ -35,16 +35,20 @@ public class RHttpClient {
             currentAttempt++;
             try (Response response = client.newCall(request).execute()) {
                 if (response.isSuccessful()) {
-                    log.info("Request successfully executed");
+                    log.debug("Request successfully executed");
 
                     return new RHttpClientResponseModel(response);
                 }
 
-                responseModel = new RHttpClientResponseModel(response);
+                if (config.getRetryCodes().contains(response.code())) {
+                    responseModel = new RHttpClientResponseModel(response);
 
-                log.debug("Request failed: {}", responseModel.toString());
+                    log.debug("Request failed: {}", responseModel.toString());
 
-                sleep(config.getWaitDuration());
+                    sleep(config.getWaitDuration());
+                } else {
+                    return new RHttpClientResponseModel(response);
+                }
             } catch (IOException | InterruptedException e) {
                 // Restore interrupted state...
                 Thread.currentThread().interrupt();
